@@ -276,11 +276,16 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
                             audio=f,
                             caption="✅ Spotify song downloaded.",
                         )
+                    logger.info(f"Spotify audio sent successfully to user {update.effective_user.id}")
+                except Exception as e:
+                    logger.error(f"Failed to send Spotify audio: {e}")
+                    await update.message.reply_text("⚠️ Failed to send audio. Please try again.")
                 finally:
                     try:
                         os.remove(path)
+                        logger.info(f"Deleted Spotify file from memory: {path}")
                     except Exception as e:
-                        logger.warning("Could not delete Spotify file: %s", e)
+                        logger.warning(f"Could not delete Spotify file {path}: {e}")
             else:
                 await update.message.reply_text("⚠️ Failed to download Spotify song. Please try another link.")
 
@@ -300,6 +305,7 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
                             caption=info,
                             parse_mode=ParseMode.MARKDOWN_V2,
                         )
+                    logger.info(f"Audio file sent successfully to user {update.effective_user.id}")
                 else:
                     with open(path, "rb") as f:
                         await update.message.reply_video(
@@ -307,8 +313,16 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
                             caption=info,
                             parse_mode=ParseMode.MARKDOWN_V2,
                         )
+                    logger.info(f"Video file sent successfully to user {update.effective_user.id}")
+            except Exception as e:
+                logger.error(f"Failed to send {file_type}: {e}")
+                await update.message.reply_text(f"⚠️ Failed to send {file_type}. Please try again.")
             finally:
-                os.remove(path)
+                try:
+                    os.remove(path)
+                    logger.info(f"Deleted {file_type} file from memory: {path}")
+                except Exception as e:
+                    logger.warning(f"Could not delete {file_type} file {path}: {e}")
         else:
             await update.message.reply_text("⚠️ Failed to process media.")
 
