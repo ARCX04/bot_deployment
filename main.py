@@ -1,16 +1,24 @@
-# Updated spotdl command in main.py to include better error handling and output format specification
+import subprocess
+import logging
 
-# Code before line 215
+# Configure logging
+def configure_logging():
+    logging.basicConfig(filename='spotify_downloader.log', level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
 
-try:
-    spotdl_command = 'spotdl --format mp3 --output "{output}"'
-    # Add logic for output template improvement
-    # For instance, changing output to include artist and title.
-    output_template = 'Output to: {artist} - {title} (Download Complete)'
-    # Assuming a function that runs this command
-    run_command(spotdl_command.format(output=output_template))
-except Exception as e:
-    print(f'An error occurred: {e}')
-    # Include additional logging or error handling
-
-# Code after line 215
+# Improved function to download Spotify song
+def download_spotify_song(song_url):
+    try:
+        # Execute the spotdl command
+        result = subprocess.run(['spotdl', song_url], capture_output=True, text=True)
+        # Check if the command was successful
+        if result.returncode == 0:
+            logging.info(f'Successfully downloaded: {song_url}')
+        else:
+            logging.error(f'Error downloading song: {result.stderr}')
+            return f'Error: {result.stderr}'
+    except Exception as e:
+        logging.critical(f'An exception occurred: {str(e)}')
+        return f'Critical Error: {str(e)}'\n
+# Call this function to set up logging
+configure_logging()
